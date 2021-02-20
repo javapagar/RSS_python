@@ -1,13 +1,15 @@
 import pandas as pd
-import requests as request
+import requests
 import xml.etree.ElementTree as xmlET
 
 url = 'https://e00-expansion.uecdn.es/rss/empresasdigitech.xml'
 
-portada = xmlET.parse(request.get(url, 'rb'))
-root = portada.getroot()
+request = requests.get(url)
 
-print(root)
+xmlPortada = xmlET.ElementTree(request.content)
+
+root = xmlPortada.getroot()
+
 
 
 
