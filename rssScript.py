@@ -2,54 +2,61 @@ import feedparser
 import requests
 import xml.etree.ElementTree as eltree
 
-expansion = 'https://e00-expansion.uecdn.es/rss/empresasdigitech.xml'
-economista ='https://www.eleconomista.es/rss/rss-empresas.php'
-cincodias ='https://cincodias.elpais.com/seccion/rss/companias/'
-confidencial = 'https://rss.elconfidencial.com/empresas/'
+def printTitlulosPeriodicos(periodicos):
+    for periodico in itemsFiltrados:
 
-response = requests.get(confidencial)
-tree = eltree.fromstring(response.content)
-items = tree.findall('channel/item')
+        print(periodico[0])
+        for articulo in periodico[1]:
+            if periodico[2]:
+                print(articulo.title)
+            else:
+                print(articulo.findtext('title'))
+            print("")
 
+def getXml(empresa, url):
 
-if items == []:
-    feed = feedparser.parse(confidencial)
-    items = feed.entries
+    atom = False
+    response = requests.get(url[1])
+    tree = eltree.fromstring(response.content)
 
-itemsFiltrados = []
+    items = tree.findall('channel/item')
 
-for item in items:
-
-    part = item.title#formato para atom
-
-    descripcion = item.findtext('description')#formato para rss
-
-    if 'Telefónica' in part or 'Caixa' in part:
-        itemsFiltrados.append(item)
-
-print(itemsFiltrados)
-
-
-def getXML(url, atom):
+    if items == []:
+        feed = feedparser.parse(url[1])
+        items = feed.entries
+        atom = True
 
     itemsFiltrados = []
 
 
-    try:
-        response = requests.get(url)
+    for item in items:
+        if atom:
+            part = item.title  # formato para atom
+        else:
+            part = item.findtext('description')  # formato para rss
 
-        tree = eltree.fromstring(response.content)
+        if empresa in part:
+            itemsFiltrados.append(item)
 
-        items = tree.findall('channel/item')
+    tuplaItems = (url[0], itemsFiltrados, atom)
 
-        for item in items:
-            categories = item.findall('category')
-            for category in categories:
-                if 'Telefónica' in category.text:
-                    itemsFiltrados.append(item)
-    except:
-        pass
+    return tuplaItems
 
-    return itemsFiltrados
+empresa ="Telefónica"
+
+expansion = ('Expansión','https://e00-expansion.uecdn.es/rss/empresasdigitech.xml')
+economista = ('El Economista', 'https://www.eleconomista.es/rss/rss-empresas.php')
+cincodias =('Cinco Dias', 'https://cincodias.elpais.com/seccion/rss/companias/')
+confidencial = ('El Confidencial','https://rss.elconfidencial.com/empresas/')
+
+lista = [expansion, economista, cincodias, confidencial]
+
+itemsFiltrados = []
+
+for url in lista:
+    itemsFiltrados.append(getXml(empresa, url))
+
+printTitlulosPeriodicos(itemsFiltrados)
+
 
 
