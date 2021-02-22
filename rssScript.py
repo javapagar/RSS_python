@@ -2,16 +2,22 @@ import feedparser
 import requests
 import xml.etree.ElementTree as eltree
 
-def printTitlulosPeriodicos(periodicos):
+def getReport(periodicos):
+    report = ""
     for periodico in itemsFiltrados:
 
-        print(periodico[0])
+        report +=periodico[0] +"\n"
+
         for articulo in periodico[1]:
             if periodico[2]:
-                print(articulo.title)
+                report += articulo.title + "\n" + articulo.id + "\n"
+
             else:
-                print(articulo.findtext('title'))
-            print("")
+                report +=articulo.findtext('title') + "\n" + articulo.findtext('link')+"\n"
+
+        report +="\n"
+
+    return report
 
 def getXml(empresa, url):
 
@@ -56,7 +62,7 @@ itemsFiltrados = []
 for url in lista:
     itemsFiltrados.append(getXml(empresa, url))
 
-printTitlulosPeriodicos(itemsFiltrados)
+print(getReport(itemsFiltrados))
 
 
 
